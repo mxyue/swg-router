@@ -6,8 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mxyue/swg-router.git"
+  },
+  "keywords": [
+    "express", "koa", "swagger"
+  ],
   "author": "mxyue",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mxyue/swg-router/issues"
+  },
+  "homepage": "https://github.com/mxyue/swg-router#readme",
   "dependencies": {
     "handlebars": "^4.7.7",
     "lodash": "^4.17.21"
