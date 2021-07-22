@@ -1,0 +1,15 @@
+{
+  "name": "swg-router",
+  "version": "1.0.0",
+  "description": "load router and create swagger docs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mxyue",
+  "license": "ISC",
+  "dependencies": {
+    "handlebars": "^4.7.7",
+    "lodash": "^4.17.21"
+  }
+}
