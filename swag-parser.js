@@ -57,6 +57,9 @@ function toSwgPath(url) {
 }
 
 function consum(parameters) {
+  if(!parameters){
+    return []
+  }
   let inForm = parameters.some(param => {
     return param.in === 'formData'
   })
@@ -99,10 +102,8 @@ function loaderPaths(basePaths, path, apiPrefix) {
       if (controllers instanceof Array) {
         controllers.forEach(item => {
           try {
-            // log(`${item.tags}, ${item.summary}`)
             if (item.tags && item.summary) {
               let aDoc = genRouterDoc(item, apiPrefix)
-              // log('aDoc->', JSON.stringify(aDoc))
               basePaths = lodash.merge(basePaths, aDoc)
             }
           } catch (err) {

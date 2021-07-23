@@ -1,49 +1,75 @@
-
-function buildSchema(schema){
-  if(schema instanceof Array){
-    throw new Error('body params 暂时不支持 数组') //todo 需要完善
+function _buildObj(value){
+  let hasChild = Object.keys(value).some(key => !key.startsWith('$') )
+  let properties
+  if(hasChild){
+    let childObj = Object.keys(value).reduce((obj, key) =>{
+      if(!key.startsWith('$')){
+        obj[key] = value[key]
+      }
+      return obj
+    }, {})
+    properties = buildPropertyies(childObj)
   }
-  let props = {}
-  Object.keys(schema).forEach(key=>{
-    let value = schema[key]
-    let type, description
-    if(typeof value === 'string'){
-      type = 'string'
-      description = value
-    }else if (typeof value === 'number'){
-      type = 'integer'
-      description = '-'
-    }else if(typeof value === 'object'){
-      if(value.type){
-        type = value.type
-      }
-      if(value.desc){
-        description = value.desc
-      }
-      if(!value.type && !value.child){
-        type = 'string'
-      }
-      if(value.child){
-        throw new Error('body params 暂时不支持 对象') //todo 需要完善
-      }
-    }
-    props[key] = {type, description}
-  })
   return {
-    "type": "object",
-    "description": "内容",
-    properties: props
+    type: hasChild ? "object" : value.$type || 'string', 
+    description: value.$desc,
+    properties
   }
 }
 
+function _buildArr(value){
+  if(value.length === 0){
+    return {type: 'array'}
+  }
+  let items, description
+  if(typeof value[0] === 'object'){
+    items = _buildObj(value[0])
+    description = value[0].$desc
+  }else{
+    items = buildPropertyies(value[0])
+  }
+  return {type: 'array', description, items: items }
+}
+
+function buildPropertyies(schema){
+  if(typeof schema === 'string'){
+    return {type: 'string', description: schema}
+  }else if (typeof schema === 'number'){
+    return {type: 'integer', description: ''}
+  }
+
+  let props = Object.keys(schema).reduce((obj, key)=>{
+    let value = schema[key]
+    if(typeof value === 'string'){
+      obj[key] = {type: 'string', description: value}
+    }else if (typeof value === 'number'){
+      obj[key] = {type: 'integer', description: ''}
+    }else if(value instanceof Array){
+      obj[key] = _buildArr(value)
+    }else if(typeof value === 'object'){
+      obj[key] = _buildObj(value)
+    }
+    return obj
+  }, {})
+  return props 
+}
+
+function buildSchema(schema){
+  if(schema instanceof Array){
+    return {type: 'array', description: '-', items: {properties: buildPropertyies(schema[0]) }} 
+  }
+  return {type: 'object', description: '-', properties: buildPropertyies(schema)} 
+}
+
 let help = {
-  inpath(name, describe){
+  inpath(name, describe, opt={}){
     return {
       "name": name,
       "in": "path",
       "description": describe,
-      "type": "string",
-      "required": true
+      "type": opt.type || "string",
+      "required": true,
+      ...opt,
     }
   },
   inquery(name, describe, required, opt={}){
@@ -51,7 +77,7 @@ let help = {
       "name": name,
       "in": "query",
       "description": describe,
-      "type": "string",
+      "type": opt.type || "string",
       "required": !!required,
       ...opt,
     }
@@ -61,14 +87,14 @@ let help = {
       "name": name,
       "in": "header",
       "description": describe,
-      "type": "string",
+      "type": opt.type || "string",
       "required": !!required,
       ...opt,
     }
   },
   inform(name, describe, required, opt={}){
     return {
-      "type": "string",
+      "type": opt.type || "string",
       "description": describe,
       "name": name,
       "in": "formData",
@@ -97,12 +123,11 @@ let help = {
       schema.xml = {name: 'xml'}
     }
     let body = {
-      "200": {
-        schema
-      }
+      schema
     }
     return body
   }
 }
+
 
 module.exports = help

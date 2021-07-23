@@ -1,6 +1,6 @@
 {
   "name": "swg-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "load router and create swagger docs",
   "main": "index.js",
   "scripts": {
